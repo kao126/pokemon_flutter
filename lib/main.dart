@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './poke_list.dart';
 import './models/theme_mode.dart';
+import './models/pokemon.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
