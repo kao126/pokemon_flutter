@@ -30,13 +30,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   ThemeMode themeMode = ThemeMode.system;
-
-  @override
-  void initState() {
-    super.initState();
-    loadThemeMode().then((val) => setState(() => themeMode = val));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeModeNotifier>(
@@ -86,27 +79,6 @@ class _TopPageState extends State<TopPage> {
   }
 }
 
-const defaultTheme = ThemeMode.system;
-
-Future<void> saveThemeMode(ThemeMode mode) async {
-  final pref = await SharedPreferences.getInstance();
-  pref.setString(mode.key, mode.name);
-}
-
-Future<ThemeMode> loadThemeMode() async {
-  final pref = await SharedPreferences.getInstance();
-  return toMode(pref.getString(defaultTheme.key) ?? defaultTheme.name);
-}
-
-ThemeMode toMode(String str) {
-  return ThemeMode.values.where((val) => val.name == str).first;
-}
-
-extension ThemeModeEx on ThemeMode {
-  String get key => toString().split('.').first;
-  String get name => toString().split('.').last;
-}
-
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
   @override
@@ -114,36 +86,31 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  ThemeMode _themeMode = ThemeMode.system;
-
-  @override
-  void initState() {
-    super.initState();
-    loadThemeMode().then((val) => setState(() => _themeMode = val));
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        ListTile(
-          leading: const Icon(Icons.lightbulb),
-          title: const Text('Dark/Light Mode'),
-          trailing: Text((_themeMode == ThemeMode.system)
-              ? 'System'
-              : (_themeMode == ThemeMode.dark ? 'Dark' : 'Light')),
-          onTap: () async {
-            var ret = await Navigator.of(context).push<ThemeMode>(
-              MaterialPageRoute(
-                builder: (context) => ThemeModeSelectionPage(mode: _themeMode),
-              ),
-            );
-            setState(() => _themeMode = ret!);
-            await saveThemeMode(_themeMode);
-          },
-        )
-      ],
-    );
+    return Consumer<ThemeModeNotifier>(
+        builder: (context, mode, child) => ListView(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.lightbulb),
+                  title: const Text('Dark/Light Mode'),
+                  trailing: Text((mode.mode == ThemeMode.system)
+                      ? 'System'
+                      : (mode.mode == ThemeMode.dark ? 'Dark' : 'Light')),
+                  onTap: () async {
+                    var ret = await Navigator.of(context).push<ThemeMode>(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ThemeModeSelectionPage(mode: mode.mode),
+                      ),
+                    );
+                    if (ret != null) {
+                      mode.update(ret);
+                    }
+                  },
+                )
+              ],
+            ));
   }
 }
 
