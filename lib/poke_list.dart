@@ -13,7 +13,7 @@ class PokeList extends StatefulWidget {
 
 class _PokeListState extends State<PokeList> {
   static const int pageSize = 30;
-  bool isFavoriteMode = true;
+  bool isFavoriteMode = false;
   int _currentPage = 1;
 
   // 表示個数
@@ -50,8 +50,8 @@ class _PokeListState extends State<PokeList> {
     }
   }
 
-  void changeMode(bool isFavoriteMode) {
-    setState(() => isFavoriteMode = !isFavoriteMode);
+  void changeMode(bool mode) {
+    setState(() => isFavoriteMode = !mode);
   }
 
   @override
@@ -76,6 +76,7 @@ class _PokeListState extends State<PokeList> {
                         builder: (BuildContext context) {
                           return ViewModeBottomSheet(
                             favMode: isFavoriteMode,
+                            changeMode: changeMode,
                           );
                         },
                       );
@@ -122,8 +123,10 @@ class ViewModeBottomSheet extends StatelessWidget {
   const ViewModeBottomSheet({
     Key? key,
     required this.favMode,
+    required this.changeMode,
   }) : super(key: key);
   final bool favMode;
+  final Function(bool) changeMode;
 
   String mainText(bool fav) {
     if (fav) {
@@ -184,7 +187,8 @@ class ViewModeBottomSheet extends StatelessWidget {
                 menuSubtitle(favMode),
               ),
               onTap: () {
-                Navigator.pop(context, true);
+                changeMode(favMode);
+                Navigator.pop(context);
               },
             ),
             OutlinedButton(
