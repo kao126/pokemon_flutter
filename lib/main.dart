@@ -2,20 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './poke_list.dart';
-import './models/theme_mode.dart';
+import './models/favorite.dart';
 import './models/pokemon.dart';
+import './models/theme_mode.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final SharedPreferences pref = await SharedPreferences.getInstance();
-  final themeModeNotifier = ThemeModeNotifier(pref);
   final pokemonsNotifier = PokemonsNotifier();
+  final themeModeNotifier = ThemeModeNotifier(pref);
+  final favoritesNotifier = FavoritesNotifier();
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider<ThemeModeNotifier>(
-          create: (context) => themeModeNotifier),
       ChangeNotifierProvider<PokemonsNotifier>(
         create: (context) => pokemonsNotifier,
+      ),
+      ChangeNotifierProvider<ThemeModeNotifier>(
+        create: (context) => themeModeNotifier,
+      ),
+      ChangeNotifierProvider<FavoritesNotifier>(
+        create: (context) => favoritesNotifier,
       ),
     ],
     child: const MyApp(),
