@@ -5,16 +5,29 @@ class FavoritesNotifier extends ChangeNotifier {
 
   List<Favorite> get favs => _favs;
 
+  void toggle(Favorite fav) {
+    if (isExist(fav.pokeId)) {
+      delete(fav.pokeId);
+    } else {
+      add(fav);
+    }
+  }
+
+  bool isExist(int id) {
+    if (_favs.indexWhere((fav) => fav.pokeId == id) < 0) {
+      return false;
+    }
+    return true;
+  }
+
   void add(Favorite fav) {
     favs.add(fav);
     notifyListeners();
   }
 
-  void delete(Favorite fav) {
-    var res = favs.remove(fav);
-    if (res) {
-      notifyListeners();
-    }
+  void delete(int id) {
+    favs.removeWhere((fav) => fav.pokeId == id);
+    notifyListeners();
     // エラー処理あった方が良い
   }
 }
