@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/favorite.dart';
 
 class FavoritesNotifier extends ChangeNotifier {
-  final List<Favorite> _favs = [];
+  late List<Favorite> _favs = [];
 
-  FavoritesNotifier() {
-    syncDb();
-  }
-
-  void syncDb() async {
-    FavoritesDb.read().then((val) {
-      val.sort((a, b) => a.pokeId.compareTo(b.pokeId));
-      _favs
-        ..clear()
-        ..addAll(val);
-    });
-    notifyListeners();
+  FavoritesNotifier(SharedPreferences pref) {
+    _init(pref);
   }
 
   List<Favorite> get favs => _favs;
+
+  void _init(SharedPreferences pref) async {
+    _favs = await loadFavorites(pref);
+    notifyListeners();
+  }
 
   void toggle(Favorite fav) {
     if (isExist(fav.pokeId)) {
@@ -34,14 +31,16 @@ class FavoritesNotifier extends ChangeNotifier {
     return true;
   }
 
-  void add(Favorite fav) async {
-    await FavoritesDb.create(fav);
-    syncDb();
+  void add(Favorite fav) {
+    favs.add(fav);
+    saveFavorites(favs);
+    notifyListeners();
   }
 
-  void delete(int id) async {
-    await FavoritesDb.delete(id);
-    syncDb();
+  void delete(int id) {
+    favs.removeWhere((fav) => fav.pokeId == id);
+    saveFavorites(favs);
+    notifyListeners();
   }
 }
 
@@ -52,9 +51,15 @@ class Favorite {
     required this.pokeId,
   });
 
+  // Map に変換（保存用）
   Map<String, dynamic> toMap() {
     return {
       'id': pokeId,
     };
+  }
+
+  // Map から Favorite インスタンスを作成（復元用）
+  factory Favorite.fromMap(Map<String, dynamic> map) {
+    return Favorite(pokeId: map['id']);
   }
 }

@@ -11,7 +11,7 @@ void main() async {
   final SharedPreferences pref = await SharedPreferences.getInstance();
   final pokemonsNotifier = PokemonsNotifier();
   final themeModeNotifier = ThemeModeNotifier(pref);
-  final favoritesNotifier = FavoritesNotifier();
+  final favoritesNotifier = FavoritesNotifier(pref);
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider<PokemonsNotifier>(
